@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+backend/signal.db
+backend/uploads/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+frontend/.env.local
+
+.env
+.DS_Store
+
+# Asli Signal app ke reference screenshots (private, commit nahi karne)
+signal-reference/
+
+# Claude Code ki local config (launch.json etc.)
+.claude/
