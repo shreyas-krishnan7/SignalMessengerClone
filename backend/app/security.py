@@ -22,8 +22,12 @@ def create_session(db: Session, user: User) -> str:
     return token
 
 
+def find_session(db: Session, token: str) -> AuthSession | None:
+    return db.scalar(select(AuthSession).where(AuthSession.token == token))
+
+
 def get_user_by_token(db: Session, token: str) -> User | None:
-    session = db.scalar(select(AuthSession).where(AuthSession.token == token))
+    session = find_session(db, token)
     return session.user if session else None
 
 
@@ -33,7 +37,7 @@ def get_current_session(
 ) -> AuthSession:
     if credentials is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not logged in")
-    session = db.scalar(select(AuthSession).where(AuthSession.token == credentials.credentials))
+    session = find_session(db, credentials.credentials)
     if session is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Session expired, please log in again")
     return session

@@ -48,24 +48,24 @@ export function Onboarding() {
     }
   }
 
-  function requestCode(event: React.FormEvent) {
-    event.preventDefault();
+  // OTP "bhejo" aur code wale step pe jao (demo account ke liye code pehle se bhara hota hai)
+  function sendCode(phoneNumber: string, prefilledCode = "") {
     run(async () => {
-      await api("/api/auth/request-otp", { method: "POST", body: { phone } });
-      setCode("");
+      await api("/api/auth/request-otp", { method: "POST", body: { phone: phoneNumber } });
+      setCode(prefilledCode);
       setStep("code");
     });
   }
 
-  // Demo account: number bhar ke seedha code wale step pe, code bhi pehle se bhara hua
+  function requestCode(event: React.FormEvent) {
+    event.preventDefault();
+    sendCode(phone);
+  }
+
   function loginWithDemo(demoNumber: string) {
     setCountryCode("+91");
     setNumber(demoNumber);
-    run(async () => {
-      await api("/api/auth/request-otp", { method: "POST", body: { phone: `+91${demoNumber}` } });
-      setCode("123456");
-      setStep("code");
-    });
+    sendCode(`+91${demoNumber}`, "123456");
   }
 
   function verifyCode(event: React.FormEvent) {

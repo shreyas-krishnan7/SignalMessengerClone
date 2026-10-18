@@ -32,7 +32,6 @@ function AuthGate() {
     );
   }
 
-  
   if (!user || !user.display_name) return <Onboarding key={user ? "profile" : "guest"} />;
 
   return (

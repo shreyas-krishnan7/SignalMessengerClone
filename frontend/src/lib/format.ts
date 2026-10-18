@@ -57,7 +57,7 @@ export function getInitials(name: string) {
 }
 
 export function firstName(name: string) {
-  return name.trim().split(/\s+/)[0] ?? name;
+  return name.trim().split(/\s+/)[0];
 }
 
 export const DISAPPEARING_OPTIONS = [
@@ -69,10 +69,6 @@ export const DISAPPEARING_OPTIONS = [
   { label: "1 day", seconds: 86400 },
   { label: "1 week", seconds: 604800 },
 ];
-
-export function formatDisappearing(seconds: number) {
-  return DISAPPEARING_OPTIONS.find((option) => option.seconds === seconds)?.label ?? `${seconds} seconds`;
-}
 
 // Phone number ko Signal jaisa padhne layak banao: "+919000000001" -> "+91 90000 00001"
 export function formatPhone(phone: string) {

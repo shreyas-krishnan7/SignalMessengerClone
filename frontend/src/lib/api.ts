@@ -1,4 +1,4 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 // http -> ws aur https -> wss
 export const WS_URL = API_URL.replace(/^http/, "ws");
 
@@ -17,15 +17,6 @@ export function saveToken(token: string | null) {
   tokenInMemory = token;
   if (token) localStorage.setItem(TOKEN_KEY, token);
   else localStorage.removeItem(TOKEN_KEY);
-}
-
-export class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
-    super(message);
-  }
 }
 
 // FastAPI error ya to string hota hai ya validation errors ki list
@@ -59,7 +50,7 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   const response = await fetch(API_URL + path, { method: options.method ?? "GET", headers, body });
   if (!response.ok) {
     const data = await response.json().catch(() => null);
-    throw new ApiError(response.status, readErrorMessage(data));
+    throw new Error(readErrorMessage(data));
   }
   return response.json();
 }

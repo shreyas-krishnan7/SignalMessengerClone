@@ -1,6 +1,6 @@
 import { PaneHeader } from "@/components/ui/misc";
 
-// Calls aur Stories sections placeholder 
+// Calls aur Stories sections ka placeholder
 export function ComingSoonView({
   title,
   icon,

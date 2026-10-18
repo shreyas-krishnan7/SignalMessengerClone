@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* Signal desktop ke light theme colors  */
@@ -49,7 +48,6 @@
   --danger: #f15b4f;
 }
 
-
 @theme inline {
   --color-rail: var(--rail);
   --color-sidebar: var(--sidebar);
@@ -83,7 +81,6 @@ body {
   color: var(--text-1);
   font-family: var(--font-sans);
 }
-
 
 * {
   scrollbar-width: thin;

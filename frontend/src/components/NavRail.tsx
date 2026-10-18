@@ -4,6 +4,12 @@ import { Menu as MenuIcon, MessageCircle, Phone, Settings } from "lucide-react";
 import { useChat } from "@/context/ChatContext";
 import type { View } from "./SignalApp";
 
+interface Tab {
+  id: View;
+  label: string;
+  icon: React.ReactNode;
+  badge: number;
+}
 
 function StoriesIcon({ filled }: { filled: boolean }) {
   return (
@@ -14,32 +20,43 @@ function StoriesIcon({ filled }: { filled: boolean }) {
   );
 }
 
-function RailButton({
-  label,
-  icon,
-  active,
-  badge = 0,
-  onClick,
-}: {
-  label: string;
-  icon: React.ReactNode;
-  active: boolean;
-  badge?: number;
-  onClick: () => void;
-}) {
+// Desktop rail aur mobile bottom bar dono ke liye same tabs
+function useTabs(view: View): Tab[] {
+  const { conversations } = useChat();
+  // Chats icon pe kitni chats mein unread messages hain
+  const unreadChats = conversations.filter((c) => c.unread_count > 0).length;
+  // Selected tab ka icon bhara hua (filled) dikhta hai, baaki outline
+  const fill = (tab: View) => (view === tab ? "currentColor" : "none");
+
+  return [
+    { id: "chats", label: "Chats", icon: <MessageCircle size={20} fill={fill("chats")} />, badge: unreadChats },
+    { id: "calls", label: "Calls", icon: <Phone size={19} fill={fill("calls")} />, badge: 0 },
+    { id: "stories", label: "Stories", icon: <StoriesIcon filled={view === "stories"} />, badge: 0 },
+    { id: "settings", label: "Settings", icon: <Settings size={20} />, badge: 0 },
+  ];
+}
+
+function UnreadBadge({ count, className }: { count: number; className: string }) {
+  if (count <= 0) return null;
+  return (
+    <span
+      className={`absolute flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold text-white ${className}`}
+    >
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
+
+function RailButton({ tab, active, onClick }: { tab: Tab; active: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      aria-label={label}
-      title={label}
+      aria-label={tab.label}
+      title={tab.label}
       className={`relative flex h-10 w-14 items-center justify-center rounded-[10px] ${active ? "bg-selected" : "hover:bg-hover"}`}
     >
-      {icon}
-      {badge > 0 && (
-        <span className="absolute top-0.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold text-white">
-          {badge > 99 ? "99+" : badge}
-        </span>
-      )}
+      {tab.icon}
+      <UnreadBadge count={tab.badge} className="top-0.5 right-1.5" />
     </button>
   );
 }
@@ -48,23 +65,15 @@ export function NavRail({
   view,
   onChangeView,
   onHideTabs,
-  className = "",
 }: {
   view: View;
   onChangeView: (view: View) => void;
   onHideTabs: () => void;
-  className?: string;
 }) {
-  const { conversations } = useChat();
-  // Chats icon pe kitni chats mein unread messages hain
-  const unreadChats = conversations.filter((c) => c.unread_count > 0).length;
-  // Selected tab ka icon bhara hua (filled) dikhta hai, baaki outline
-  const fill = (tab: View) => (view === tab ? "currentColor" : "none");
+  const [chats, calls, stories, settings] = useTabs(view);
 
   return (
-    <nav
-      className={`${className} hidden w-20 shrink-0 flex-col items-center justify-between border-r border-line bg-rail pt-2 pb-3 md:flex`}
-    >
+    <nav className="hidden w-20 shrink-0 flex-col items-center justify-between border-r border-line bg-rail pt-2 pb-3 md:flex">
       <div className="flex flex-col items-center gap-1">
         <button
           onClick={onHideTabs}
@@ -74,49 +83,20 @@ export function NavRail({
         >
           <MenuIcon size={20} />
         </button>
-        <RailButton
-          label="Chats"
-          icon={<MessageCircle size={20} fill={fill("chats")} />}
-          active={view === "chats"}
-          badge={unreadChats}
-          onClick={() => onChangeView("chats")}
-        />
-        <RailButton
-          label="Calls"
-          icon={<Phone size={19} fill={fill("calls")} />}
-          active={view === "calls"}
-          onClick={() => onChangeView("calls")}
-        />
-        <RailButton
-          label="Stories"
-          icon={<StoriesIcon filled={view === "stories"} />}
-          active={view === "stories"}
-          onClick={() => onChangeView("stories")}
-        />
+        {[chats, calls, stories].map((tab) => (
+          <RailButton key={tab.id} tab={tab} active={view === tab.id} onClick={() => onChangeView(tab.id)} />
+        ))}
       </div>
 
-      <RailButton
-        label="Settings"
-        icon={<Settings size={20} />}
-        active={view === "settings"}
-        onClick={() => onChangeView("settings")}
-      />
+      {/* Settings sabse neeche */}
+      <RailButton tab={settings} active={view === "settings"} onClick={() => onChangeView("settings")} />
     </nav>
   );
 }
 
 // Mobile pe Signal app jaisa neeche tab bar: icon ke peeche pill, neeche label
 export function BottomTabs({ view, onChangeView }: { view: View; onChangeView: (view: View) => void }) {
-  const { conversations } = useChat();
-  const unreadChats = conversations.filter((c) => c.unread_count > 0).length;
-  const fill = (tab: View) => (view === tab ? "currentColor" : "none");
-
-  const tabs: { id: View; label: string; icon: React.ReactNode; badge?: number }[] = [
-    { id: "chats", label: "Chats", icon: <MessageCircle size={20} fill={fill("chats")} />, badge: unreadChats },
-    { id: "calls", label: "Calls", icon: <Phone size={19} fill={fill("calls")} /> },
-    { id: "stories", label: "Stories", icon: <StoriesIcon filled={view === "stories"} /> },
-    { id: "settings", label: "Settings", icon: <Settings size={20} /> },
-  ];
+  const tabs = useTabs(view);
 
   return (
     <nav className="flex shrink-0 justify-around border-t border-line bg-rail pt-2 pb-3 md:hidden">
@@ -132,11 +112,7 @@ export function BottomTabs({ view, onChangeView }: { view: View; onChangeView: (
             {tab.icon}
           </span>
           {tab.label}
-          {!!tab.badge && (
-            <span className="absolute -top-1 right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold text-white">
-              {tab.badge > 99 ? "99+" : tab.badge}
-            </span>
-          )}
+          <UnreadBadge count={tab.badge} className="-top-1 right-2" />
         </button>
       ))}
     </nav>

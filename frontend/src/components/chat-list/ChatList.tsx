@@ -8,18 +8,11 @@ import { IconButton, PaneHeader } from "@/components/ui/misc";
 import { useAuth } from "@/context/AuthContext";
 import { useChat } from "@/context/ChatContext";
 import { useToast } from "@/context/ToastContext";
+import { userMatches } from "@/lib/chatUtils";
 import { useMinuteTick } from "@/lib/hooks";
-import type { Conversation, User } from "@/lib/types";
+import type { Conversation } from "@/lib/types";
 import { ChatListItem } from "./ChatListItem";
 import { NewChatPanel } from "./NewChatPanel";
-
-function userMatches(user: User, query: string) {
-  return (
-    user.display_name.toLowerCase().includes(query) ||
-    (user.username ?? "").includes(query) ||
-    user.phone.includes(query)
-  );
-}
 
 interface ChatListProps {
   className: string;

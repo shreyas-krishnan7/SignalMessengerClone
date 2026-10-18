@@ -307,6 +307,11 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     if (!activeConversation || !user) return;
     const conversationId = activeConversation.id;
     const clientId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const attachmentFields = {
+      attachment_url: attachment?.url ?? null,
+      attachment_name: attachment?.name ?? null,
+      attachment_type: attachment?.content_type ?? null,
+    };
 
     // Optimistic UI: server ke jawab se pehle hi message "sending" status ke saath dikha do
     const tempMessage: Message = {
@@ -315,9 +320,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       sender_id: user.id,
       type: attachment ? "attachment" : "text",
       body,
-      attachment_url: attachment?.url ?? null,
-      attachment_name: attachment?.name ?? null,
-      attachment_type: attachment?.content_type ?? null,
+      ...attachmentFields,
       reply_to: replyTo
         ? {
             id: replyTo.id,
@@ -346,14 +349,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     try {
       const saved = await api<Message>(`/api/conversations/${conversationId}/messages`, {
         method: "POST",
-        body: {
-          body,
-          reply_to_id: replyTo?.id ?? null,
-          attachment_url: attachment?.url ?? null,
-          attachment_name: attachment?.name ?? null,
-          attachment_type: attachment?.content_type ?? null,
-          client_id: clientId,
-        },
+        body: { body, reply_to_id: replyTo?.id ?? null, ...attachmentFields, client_id: clientId },
       });
       changeMessages(conversationId, (list) => upsertMessage(list, saved));
       updateConversation(conversationId, (c) =>
@@ -367,22 +363,25 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  async function toggleReaction(messageId: number, emoji: string) {
+  // Reaction / delete: server updated message wapas deta hai, usko list mein laga do
+  async function updateMessageOnServer(request: Promise<Message>, failText: string) {
     try {
-      const updated = await api<Message>(`/api/messages/${messageId}/reactions`, { method: "POST", body: { emoji } });
-      handleUpdatedMessage(updated);
+      handleUpdatedMessage(await request);
     } catch (error) {
-      showToast(error instanceof Error ? error.message : "Couldn't react");
+      showToast(error instanceof Error ? error.message : failText);
     }
   }
 
-  async function deleteMessage(messageId: number) {
-    try {
-      const updated = await api<Message>(`/api/messages/${messageId}`, { method: "DELETE" });
-      handleUpdatedMessage(updated);
-    } catch (error) {
-      showToast(error instanceof Error ? error.message : "Couldn't delete message");
-    }
+  function toggleReaction(messageId: number, emoji: string) {
+    const request = api<Message>(`/api/messages/${messageId}/reactions`, { method: "POST", body: { emoji } });
+    return updateMessageOnServer(request, "Couldn't react");
+  }
+
+  function deleteMessage(messageId: number) {
+    return updateMessageOnServer(
+      api<Message>(`/api/messages/${messageId}`, { method: "DELETE" }),
+      "Couldn't delete message",
+    );
   }
 
   function sendTyping(isTyping: boolean) {

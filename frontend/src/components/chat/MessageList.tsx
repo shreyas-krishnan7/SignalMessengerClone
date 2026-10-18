@@ -82,6 +82,7 @@ export function MessageList({
   }
 
   const membersById = new Map(conversation.members.map((m) => [m.id, m]));
+  const typingMember = membersById.get(typingIds[0]);
   // Chat ke andar search: sirf wo messages dikhao jinke text mein query ho
   const query = search.trim().toLowerCase();
   const visibleMessages = query
@@ -147,9 +148,9 @@ export function MessageList({
           <div className="mt-3 flex items-end gap-2">
             {isGroup && (
               <Avatar
-                name={membersById.get(typingIds[0])?.display_name ?? ""}
-                color={membersById.get(typingIds[0])?.avatar_color ?? "A100"}
-                url={membersById.get(typingIds[0])?.avatar_url}
+                name={typingMember?.display_name ?? ""}
+                color={typingMember?.avatar_color ?? "A100"}
+                url={typingMember?.avatar_url}
                 size={28}
               />
             )}

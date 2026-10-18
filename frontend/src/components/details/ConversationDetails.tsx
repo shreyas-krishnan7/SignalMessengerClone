@@ -50,17 +50,19 @@ export function ConversationDetails({ conversation, onBack }: { conversation: Co
     request(`/api/conversations/${conversation.id}`, "PATCH", { disappearing_seconds: seconds });
   }
 
+  const memberPath = (userId: number) => `/api/conversations/${conversation.id}/members/${userId}`;
+
   function removeMember(member: Member) {
-    request(`/api/conversations/${conversation.id}/members/${member.id}`, "DELETE");
+    request(memberPath(member.id), "DELETE");
   }
 
   function setRole(member: Member, role: "admin" | "member") {
-    request(`/api/conversations/${conversation.id}/members/${member.id}`, "PATCH", { role });
+    request(memberPath(member.id), "PATCH", { role });
   }
 
   function leaveGroup() {
     // Server "conversation.removed" event bhejega, jisse chat list se hat jayegi
-    request(`/api/conversations/${conversation.id}/members/${myId}`, "DELETE");
+    request(memberPath(myId), "DELETE");
   }
 
   const comingSoon = (feature: string) => () => showToast(`${feature} is coming soon`);

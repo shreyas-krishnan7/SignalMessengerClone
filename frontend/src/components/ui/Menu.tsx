@@ -55,8 +55,3 @@ export function MenuItem({
     </button>
   );
 }
-
-// Menu ke beech patli line (Signal mein items ke groups alag karti hai)
-export function MenuDivider() {
-  return <div className="mx-1 my-1 h-px bg-line" />;
-}

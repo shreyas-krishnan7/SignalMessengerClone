@@ -25,7 +25,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-
 function SettingsGroup({ title, note, children }: { title?: string; note?: string; children: React.ReactNode }) {
   return (
     <div className="mb-5">

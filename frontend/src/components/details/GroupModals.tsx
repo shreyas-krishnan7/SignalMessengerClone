@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ContactPicker, toggleId } from "@/components/modals/ContactPicker";
 import { AvatarPicker } from "@/components/ui/AvatarPicker";
 import { Button, Modal } from "@/components/ui/Modal";
+import { textInputClass } from "@/components/ui/misc";
 import { useChat } from "@/context/ChatContext";
 import { useToast } from "@/context/ToastContext";
 import { api } from "@/lib/api";
@@ -97,14 +98,14 @@ export function EditGroupModal({ conversation, onClose }: { conversation: Conver
         onChange={(e) => setName(e.target.value)}
         placeholder="Group name"
         maxLength={64}
-        className="mt-4 w-full rounded-lg bg-input px-3 py-2.5 text-[15px] outline-none focus:ring-2 focus:ring-accent"
+        className={`mt-4 ${textInputClass}`}
       />
       <input
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder="Description"
         maxLength={255}
-        className="mt-3 w-full rounded-lg bg-input px-3 py-2.5 text-[15px] outline-none focus:ring-2 focus:ring-accent"
+        className={`mt-3 ${textInputClass}`}
       />
     </Modal>
   );

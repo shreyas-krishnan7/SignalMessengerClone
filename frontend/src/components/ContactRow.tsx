@@ -7,14 +7,12 @@ export function ContactRow({
   user,
   onClick,
   right,
-  subtitle,
   name,
 }: {
   user: User;
   name?: string; // naam ki jagah kuch aur dikhana ho (jaise "You")
   onClick?: () => void;
   right?: React.ReactNode;
-  subtitle?: string;
 }) {
   return (
     <button
@@ -26,7 +24,7 @@ export function ContactRow({
       <div className="min-w-0 flex-1">
         <p className="truncate text-[14px]">{name ?? user.display_name}</p>
         <p className="truncate text-[13px] text-secondary">
-          {subtitle ?? (user.about || (user.username ? `@${user.username}` : formatPhone(user.phone)))}
+          {user.about || (user.username ? `@${user.username}` : formatPhone(user.phone))}
         </p>
       </div>
       {right}

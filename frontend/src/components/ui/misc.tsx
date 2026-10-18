@@ -1,5 +1,9 @@
 import { Menu, Search } from "lucide-react";
 
+// Modals ke form inputs (group name, add contact, etc.) ka common style
+export const textInputClass =
+  "w-full rounded-lg bg-input px-3 py-2.5 text-[15px] outline-none focus:ring-2 focus:ring-accent";
+
 export function SignalLogo({ size = 48, className = "" }: { size?: number; className?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" className={className} aria-label="Signal">
@@ -28,7 +32,6 @@ export function Toggle({
   onChange: (value: boolean) => void;
   disabled?: boolean;
 }) {
-  
   return (
     <button
       role="switch"
@@ -86,14 +89,12 @@ export function IconButton({
 export function ListRow({
   icon,
   label,
-  description,
   onClick,
   right,
   danger = false,
 }: {
   icon: React.ReactNode;
   label: string;
-  description?: string;
   onClick?: () => void;
   right?: React.ReactNode;
   danger?: boolean;
@@ -105,10 +106,7 @@ export function ListRow({
       className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left hover:bg-hover ${danger ? "text-danger" : ""}`}
     >
       {icon}
-      <span className="min-w-0 flex-1">
-        <span className="block text-[14px]">{label}</span>
-        {description && <span className="block text-[13px] text-secondary">{description}</span>}
-      </span>
+      <span className="min-w-0 flex-1 text-[14px]">{label}</span>
       {right}
     </button>
   );
@@ -137,7 +135,7 @@ export function SearchInput({
   );
 }
 
-
+// Signal style gol checkbox
 export function RoundCheckbox({ checked }: { checked: boolean }) {
   return (
     <span

@@ -18,9 +18,10 @@ async def notify_status_updates(updates: dict[int, list[dict]]):
         await manager.send_to_user(sender_id, "message.status", {"updates": items})
 
 
-async def notify_conversation_updated(user_ids, conversation_id: int):
-    # Frontend ye event milne pe conversation dobara fetch kar leta hai
-    await manager.send_to_users(user_ids, "conversation.updated", {"conversation_id": conversation_id})
+async def notify_conversation_updated(db: Session, conversation_id: int):
+    # Sab members ko batao; frontend ye event milne pe conversation dobara fetch kar leta hai
+    member_ids = get_member_ids(db, conversation_id)
+    await manager.send_to_users(member_ids, "conversation.updated", {"conversation_id": conversation_id})
 
 
 async def notify_conversation_removed(user_id: int, conversation_id: int):

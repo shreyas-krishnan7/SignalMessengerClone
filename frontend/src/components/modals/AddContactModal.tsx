@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ContactRow } from "@/components/ContactRow";
 import { Button, Modal } from "@/components/ui/Modal";
+import { textInputClass } from "@/components/ui/misc";
 import { useChat } from "@/context/ChatContext";
 import { useToast } from "@/context/ToastContext";
 import { api } from "@/lib/api";
@@ -58,7 +59,7 @@ export function AddContactModal({ onClose }: { onClose: () => void }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="+91 90000 00002 or @username"
-            className="w-full rounded-lg bg-input px-3 py-2.5 text-[15px] outline-none focus:ring-2 focus:ring-accent"
+            className={textInputClass}
           />
           {error && <p className="mt-2 text-sm text-danger">{error}</p>}
           <div className="mt-4 flex justify-end">

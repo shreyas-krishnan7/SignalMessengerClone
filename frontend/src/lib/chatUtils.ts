@@ -1,4 +1,4 @@
-import type { Conversation, Message, MessageStatus } from "./types";
+import type { Conversation, Message, MessageStatus, User } from "./types";
 
 const STATUS_RANK: Record<MessageStatus, number> = { sending: 0, failed: 0, sent: 1, delivered: 2, read: 3 };
 
@@ -20,6 +20,15 @@ export function upsertMessage(list: Message[], message: Message): Message[] {
   const copy = [...list];
   copy[index] = { ...message, status: higherStatus(list[index].status, message.status) };
   return copy;
+}
+
+// Search: naam, username ya phone number mein query ho to match (query lowercase honi chahiye)
+export function userMatches(user: User, query: string) {
+  return (
+    user.display_name.toLowerCase().includes(query) ||
+    (user.username ?? "").includes(query) ||
+    user.phone.includes(query)
+  );
 }
 
 // Last message ka chhota preview text (chat list ke liye)

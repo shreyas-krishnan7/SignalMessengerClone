@@ -53,6 +53,8 @@ export function MessageBubble({
   const colors = mine ? "bg-accent text-white" : "bg-bubble-in text-primary";
 
   const isImage = message.attachment_type?.startsWith("image/");
+  const attachmentHref = message.attachment_url ? fileUrl(message.attachment_url) : "";
+  const nameColor = getAvatarColor(sender?.avatar_color ?? "A210");
   const reactionGroups = groupReactions(message, myId);
 
   function copyText() {
@@ -134,8 +136,8 @@ export function MessageBubble({
               className="mb-0.5 text-[13px] font-semibold text-(--name-light) dark:text-(--name-dark)"
               style={
                 {
-                  "--name-light": getAvatarColor(sender?.avatar_color ?? "A210").fg,
-                  "--name-dark": getAvatarColor(sender?.avatar_color ?? "A210").bg,
+                  "--name-light": nameColor.fg,
+                  "--name-dark": nameColor.bg,
                 } as React.CSSProperties
               }
             >
@@ -153,21 +155,16 @@ export function MessageBubble({
 
               {message.attachment_url &&
                 (isImage ? (
-                  <a
-                    href={fileUrl(message.attachment_url)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="-mx-1.5 mt-0.5 mb-1 block"
-                  >
+                  <a href={attachmentHref} target="_blank" rel="noreferrer" className="-mx-1.5 mt-0.5 mb-1 block">
                     <img
-                      src={fileUrl(message.attachment_url)}
+                      src={attachmentHref}
                       alt={message.attachment_name ?? "Image"}
                       className="max-h-[320px] w-full rounded-xl object-cover"
                     />
                   </a>
                 ) : (
                   <a
-                    href={fileUrl(message.attachment_url)}
+                    href={attachmentHref}
                     target="_blank"
                     rel="noreferrer"
                     download={message.attachment_name ?? undefined}

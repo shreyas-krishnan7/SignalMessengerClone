@@ -30,14 +30,12 @@ from ..services import (
 
 router = APIRouter(prefix="/api/conversations", tags=["conversations"])
 
+# Members aur unke users ek saath load kar lete hain taaki baar baar query na chale
+WITH_MEMBERS = selectinload(Conversation.members).selectinload(ConversationMember.user)
+
 
 def load_conversation(db: Session, conversation_id: int) -> Conversation:
-    # Members aur unke users ek saath load kar lete hain taaki baar baar query na chale
-    return db.scalar(
-        select(Conversation)
-        .options(selectinload(Conversation.members).selectinload(ConversationMember.user))
-        .where(Conversation.id == conversation_id)
-    )
+    return db.scalar(select(Conversation).options(WITH_MEMBERS).where(Conversation.id == conversation_id))
 
 
 @router.get("", response_model=list[ConversationOut])
@@ -46,7 +44,7 @@ def list_conversations(user: User = Depends(get_current_user), db: Session = Dep
         select(Conversation)
         .join(ConversationMember)
         .where(ConversationMember.user_id == user.id)
-        .options(selectinload(Conversation.members).selectinload(ConversationMember.user))
+        .options(WITH_MEMBERS)
         .order_by(Conversation.last_message_at.desc())
     )
     result = [conversation_out(db, c, user.id) for c in conversations]
@@ -102,7 +100,7 @@ async def create_group(payload: CreateGroupRequest, user: User = Depends(get_cur
     db.commit()
 
     create_system_message(db, conversation, user.id, f"{user.display_name} created the group.")
-    await notify_conversation_updated(get_member_ids(db, conversation.id), conversation.id)
+    await notify_conversation_updated(db, conversation.id)
     return conversation_out(db, load_conversation(db, conversation.id), user.id)
 
 
@@ -119,8 +117,7 @@ async def update_conversation(
     system_texts = []
 
     # Group ka naam/description/photo sirf admin badal sakta hai
-    group_fields = {"name", "description", "avatar_url"} & changes.keys()
-    if group_fields:
+    if {"name", "description", "avatar_url"} & changes.keys():
         require_group(conversation)
         require_admin(membership)
         if "name" in changes and changes["name"].strip() != conversation.name:
@@ -142,7 +139,7 @@ async def update_conversation(
     db.commit()
     for text in system_texts:
         await broadcast_message(db, create_system_message(db, conversation, user.id, text))
-    await notify_conversation_updated(get_member_ids(db, conversation_id), conversation_id)
+    await notify_conversation_updated(db, conversation_id)
     return conversation_out(db, load_conversation(db, conversation_id), user.id)
 
 
@@ -170,7 +167,7 @@ async def add_members(
 
     names = ", ".join(u.display_name for u in new_users)
     await broadcast_message(db, create_system_message(db, conversation, user.id, f"{user.display_name} added {names}."))
-    await notify_conversation_updated(get_member_ids(db, conversation_id), conversation_id)
+    await notify_conversation_updated(db, conversation_id)
     return conversation_out(db, load_conversation(db, conversation_id), user.id)
 
 
@@ -203,7 +200,7 @@ async def remove_member(
         db.commit()
 
     await broadcast_message(db, create_system_message(db, conversation, user.id, text))
-    await notify_conversation_updated(get_member_ids(db, conversation_id), conversation_id)
+    await notify_conversation_updated(db, conversation_id)
     await notify_conversation_removed(user_id, conversation_id)
     return {"ok": True}
 
@@ -224,5 +221,5 @@ async def update_member_role(
     target.role = payload.role
     db.commit()
 
-    await notify_conversation_updated(get_member_ids(db, conversation_id), conversation_id)
+    await notify_conversation_updated(db, conversation_id)
     return conversation_out(db, load_conversation(db, conversation_id), user.id)

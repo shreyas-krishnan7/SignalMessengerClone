@@ -7,6 +7,7 @@ import { IconButton, SearchInput, SectionLabel } from "@/components/ui/misc";
 import { useChat } from "@/context/ChatContext";
 import { useToast } from "@/context/ToastContext";
 import { api } from "@/lib/api";
+import { userMatches } from "@/lib/chatUtils";
 import { useDebouncedValue } from "@/lib/hooks";
 import type { User } from "@/lib/types";
 
@@ -54,12 +55,7 @@ export function NewChatPanel({
   }, [search]);
 
   const contactIds = new Set(contacts.map((c) => c.user.id));
-  const visibleContacts = contacts.filter(
-    (c) =>
-      c.user.display_name.toLowerCase().includes(search) ||
-      (c.user.username ?? "").includes(search) ||
-      c.user.phone.includes(search),
-  );
+  const visibleContacts = contacts.filter((c) => userMatches(c.user, search));
   const nonContacts = otherUsers.filter((u) => !contactIds.has(u.id));
 
   async function openChat(userId: number) {
